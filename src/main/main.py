@@ -1,6 +1,7 @@
 import argparse
 from collections import Counter
 import gzip
+import re
 import requests
 import sys
 
@@ -40,7 +41,7 @@ def package_parser(arch: str, count: int = 10) -> list:
     returns: list of tuples containing package name and counts
     ----
     """
-    pkgs = []
+    pkg_count = Counter([])
     url = f'{URL_BASE}Contents-{arch}.gz'
 
     # download content from debian website
@@ -61,12 +62,12 @@ def package_parser(arch: str, count: int = 10) -> list:
     
     # decode data to utf-8 and put all pkgs into list
     for l in lines:
-        l = l.decode("utf-8")
-        current_pkgs = l.split()[1].split(',')
-        pkgs.extend(current_pkgs)
+        match = re.match(r'^(.*)\s+(\S+)$', l.decode('utf-8').strip())
+        if match:
+            file_path, current_pkgs = match.groups()
+            pkg_count.update(current_pkgs.split(','))
     
     #count top <count> packages. 
-    pkg_count = Counter(pkgs)
     top_x = pkg_count.most_common(count)
     return top_x
 
