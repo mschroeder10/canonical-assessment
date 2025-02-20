@@ -47,29 +47,27 @@ def package_parser(arch: str, count: int = 10) -> list:
     # download content from debian website
     try: 
         req = requests.get(url, stream=True)
-        if req.status_code == 404: # check if content is found
-            print(f"Content not found at {url}. Please double check the architecture exists at {URL_BASE}.")
-            sys.exit(1)
+        req.raise_for_status()
+
+        # read gzip encoded data
+        data = req.raw
+        with gzip.open(data, 'rb') as f:
+            lines = f.readlines()
+            
+        # decode data to utf-8 and put all pkgs into list
+        for l in lines:
+            match = re.match(r'^(.*)\s+(\S+)$', l.decode('utf-8').strip())
+            if match:
+                file_path, current_pkgs = match.groups()
+                pkg_count.update(current_pkgs.split(','))
+        
+        #count top <count> packages. 
+        top_x = pkg_count.most_common(count)
+        return top_x
     except Exception as e: # handle issues with requests itself
-        print (f"There was an error downloading content at {url}")
+        print(f"Content not found at {url}. Please double check the architecture exists at {URL_BASE}.")
         print (e)
         sys.exit(1)
-
-    # read gzip encoded data
-    data = req.raw
-    with gzip.open(data, 'rb') as f:
-        lines = f.readlines()
-    
-    # decode data to utf-8 and put all pkgs into list
-    for l in lines:
-        match = re.match(r'^(.*)\s+(\S+)$', l.decode('utf-8').strip())
-        if match:
-            file_path, current_pkgs = match.groups()
-            pkg_count.update(current_pkgs.split(','))
-    
-    #count top <count> packages. 
-    top_x = pkg_count.most_common(count)
-    return top_x
 
 def main():
     parser = argparse.ArgumentParser(description='Debian top 10 packages per architecture')
