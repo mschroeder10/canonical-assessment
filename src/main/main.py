@@ -20,12 +20,8 @@ def package_repr(pkgs: list) -> None:
     """
     result = ""
     max_len = max(len(i[0]) for i in pkgs) + 4 # set standard line length so pkg counts line up
-    for i, p in enumerate(pkgs):
-        idx_str = str(i+1)
-        name = p[0]
-        count = p[1]
-        spaces = (max_len-len(name)-len(idx_str)) * " "
-        result += f'{idx_str}. {name}{spaces}{count}\n'
+    for i, p in enumerate(pkgs, start=1):
+        print(f'{i:2}. {p[0]:{max_len}}\t{p[1]}')
     print (result)
 
 
