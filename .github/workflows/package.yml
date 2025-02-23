@@ -19,7 +19,9 @@ jobs:
           ./src/main/main.py amd64
       - name: Create Tarball
         run: |
-          tar -czvf project.tar.gz .
+          cd ..
+          ls -la
+          tar -czvf project.tar.gz canonical-assessment
           ls -la
       - name: Upload Tar
         uses: actions/upload-artifact@v4
