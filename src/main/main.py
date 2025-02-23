@@ -57,7 +57,11 @@ def package_parser(arch: str, count: int = 10) -> list:
 
         # decode data to utf-8 and put all pkgs into list
         for line in lines:
-            match = re.match(r'^\s*(\S.*\S)\s+(\S+)\s*$', line.decode('utf-8').strip())
+            
+            # Use a regular expression to parse a line in the contents file.
+            # First group matches filename, beginning and ending with non-whitespace.
+            # Second group matches list of packages without whitespace. Trailing whitespace is ignored.
+            match = re.match(r'^(\S.*\S)\s+(\S+)\s*$', line.decode('utf-8').strip())
             if match:
                 file_path, current_pkgs = match.groups()
                 pkg_count.update(current_pkgs.split(','))
